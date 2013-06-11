@@ -81,6 +81,7 @@ set ignorecase
 set shell=bash
 set statusline=File:\ %f\ %r%=\|\ Total\ lines:%L\ \|\ Row:%l\ \|\ Col:%c\ \|\ %p%%\ 
 set laststatus=2
+set formatoptions+=cro
 	
 map <F5> :set list! <enter>
 
