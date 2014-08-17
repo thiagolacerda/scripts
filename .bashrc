@@ -3,7 +3,8 @@
 # for examples
 
 #source ~/.git-completion.sh
-source /etc/bash_completion.d/git
+source /usr/share/git/completion/git-completion.bash
+source /usr/share/git/completion/git-prompt.sh
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
@@ -114,3 +115,37 @@ export EDITOR=vim
 export HISTFILESIZE=1000000000
 export HISTSIZE=1000000000
 export PATH=$PATH:~/.bin
+export NODE_PATH=/usr/lib/node_modules
+
+function setWebKit() {
+    PORT="nix"
+    TYPE="Release"
+    if [[ "$1" != "" ]]
+    then
+        PORT=${1}
+    fi
+    if [[ "$2" != "" ]]
+    then
+        TYPE="$(tr '[:lower:]' '[:upper:]' <<< ${2:0:1})${2:1}"
+    fi
+
+    BUILDDIR=/home/thiagolacerda/projects/webkit/${PORT}build
+    INSTALLDIR=/home/thiagolacerda/projects/webkit/${PORT}install
+
+    echo "setting environment for WebKit ${PORT}"
+    export WEBKIT_OUTPUTDIR=${BUILDDIR}
+    export WEBKIT_INSTALLDIR=${INSTALLDIR}
+    export PATH=/usr/lib/ccache/bin:/home/thiagolacerda/.bin/python:${PATH}
+    export LD_LIBRARY_PATH=${WEBKIT_INSTALLDIR}/lib:${WEBKIT_OUTPUTDIR}/Dependencies/Root/lib64
+    export PKG_CONFIG_PATH=${WEBKIT_INSTALLDIR}/lib/pkgconfig/:${WEBKIT_OUTPUTDIR}/Dependencies/Root/lib64/pkgconfig
+    if [[ "${PORT}" == "qt" ]]
+    then
+        export PATH=/home/thiagolacerda/.bin/qt5:${PATH}
+    fi
+}
+
+function setNS2() {
+    export PATH=/home/thiagolacerda/MSc/redes/ns-allinone-2.35/ns-2.35:/home/thiagolacerda/.bin/python:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/bin:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/tcl8.5.10/unix:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/tk8.5.10/unix:$PATH
+    export LD_LIBRARY_PATH=/home/thiagolacerda/MSc/redes/ns-allinone-2.35/otcl-1.14:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/lib:$LD_LIBRARY_PATH
+    export TCL_LIBRARY_PATH=/home/thiagolacerda/MSc/redes/ns-allinone-2.35/tcl8.5.10/library
+}
