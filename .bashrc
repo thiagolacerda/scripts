@@ -3,8 +3,11 @@
 # for examples
 
 #source ~/.git-completion.sh
-source /usr/share/git/completion/git-completion.bash
-source /usr/share/git/completion/git-prompt.sh
+#source /usr/share/git/completion/git-completion.bash
+#source /usr/share/git/completion/git-prompt.sh
+source /usr/local/etc/bash_completion
+source /usr/local/opt/bash-git-prompt/share/gitprompt.sh
+#source /opt/local/etc/bash_completion
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
@@ -111,41 +114,60 @@ fi
 
 # Variables
 export CLICOLOR="auto"
-export EDITOR=vim
+export EDITOR=nvim
 export HISTFILESIZE=1000000000
 export HISTSIZE=1000000000
 export PATH=$PATH:~/.bin
 export NODE_PATH=/usr/lib/node_modules
 
-function setWebKit() {
-    PORT="nix"
-    TYPE="Release"
-    if [[ "$1" != "" ]]
+# perforce stuff
+#export P4USER=
+#export P4PORT=
+#export P4EDITOR=nvim
+#export P4DIFF=colordiff
+#export P4CONFIG=.p4config
+#export P4MERGE=p4merge
+
+# tableau unit tests
+export LANG=en_US.UTF-8
+
+# homebrew
+export HOMEBREW_GITHUB_API_TOKEN=e52afde95a2f8414ddde78b899dda2c3d24a2709
+
+# ccache
+#if [ -d /usr/local/opt/ccache/libexec/ ]; then
+#    export PATH=/usr/local/opt/ccache/libexec:$PATH
+#fi
+
+function workspace() {
+    P4CLIENT=`basename "$1"`
+    WORKDIR=$1
+    TICKET=`p4 login -s`
+    echo $TICKET
+    if ! [[ "$TICKET" =~ "User ${P4USER} ticket expires in" ]]
     then
-        PORT=${1}
-    fi
-    if [[ "$2" != "" ]]
-    then
-        TYPE="$(tr '[:lower:]' '[:upper:]' <<< ${2:0:1})${2:1}"
+        p4 login
     fi
 
-    BUILDDIR=/home/thiagolacerda/projects/webkit/${PORT}build
-    INSTALLDIR=/home/thiagolacerda/projects/webkit/${PORT}install
-
-    echo "setting environment for WebKit ${PORT}"
-    export WEBKIT_OUTPUTDIR=${BUILDDIR}
-    export WEBKIT_INSTALLDIR=${INSTALLDIR}
-    export PATH=/usr/lib/ccache/bin:/home/thiagolacerda/.bin/python:${PATH}
-    export LD_LIBRARY_PATH=${WEBKIT_INSTALLDIR}/lib:${WEBKIT_OUTPUTDIR}/Dependencies/Root/lib64
-    export PKG_CONFIG_PATH=${WEBKIT_INSTALLDIR}/lib/pkgconfig/:${WEBKIT_OUTPUTDIR}/Dependencies/Root/lib64/pkgconfig
-    if [[ "${PORT}" == "qt" ]]
+    if [ ! -d "${WORKDIR}" ]
     then
-        export PATH=/home/thiagolacerda/.bin/qt5:${PATH}
+        mkdir ${WORKDIR}
+        echo "P4CLIENT=$P4CLIENT" > ${WORKDIR}/.p4config
     fi
+    cd ${WORKDIR}
 }
 
-function setNS2() {
-    export PATH=/home/thiagolacerda/MSc/redes/ns-allinone-2.35/ns-2.35:/home/thiagolacerda/.bin/python:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/bin:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/tcl8.5.10/unix:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/tk8.5.10/unix:$PATH
-    export LD_LIBRARY_PATH=/home/thiagolacerda/MSc/redes/ns-allinone-2.35/otcl-1.14:/home/thiagolacerda/MSc/redes/ns-allinone-2.35/lib:$LD_LIBRARY_PATH
-    export TCL_LIBRARY_PATH=/home/thiagolacerda/MSc/redes/ns-allinone-2.35/tcl8.5.10/library
+function generate_ctags() {
+    CURRENT_DIR=`pwd`
+    DIR_TAIL=`basename ${CURRENT_DIR}`
+    TAGS_DIR="$HOME/.tags/${DIR_TAIL}"
+    echo $TAGS_DIR
+    if [ ! -d "${TAGS_DIR}" ]
+    then
+        mkdir "$TAGS_DIR"
+    fi
+    cd $TAGS_DIR
+    find $CURRENT_DIR -name \*.h -print -o -name \*.cpp -print | ctags --fields=+l --extra=+f -f $TAGS_DIR/tags -L - $CURRENT_DIR
 }
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
